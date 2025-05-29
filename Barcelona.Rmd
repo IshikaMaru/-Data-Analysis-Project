@@ -1,0 +1,123 @@
+---
+title: "Cultural interest points in the city of Barcelona"
+author: "Ishika, Hradyesh, Moksha"
+date: "2024-12-07"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r Load_libraries, include=FALSE}
+# Load required libraries
+library(dplyr)
+library(leaflet)
+```
+
+## Introduction
+
+This document demonstrates the use of R and the leaflet library to create an interactive map showcasing various locations. The dataset used contains latitude and longitude coordinates, which are visualized on the map.
+
+## Data Preparation
+
+The dataset is cleaned and prepared for visualization. Missing and invalid data points are removed to ensure accurate mapping.
+
+### Explanation:
+- **Data Loading:** Imports the cleaned dataset from a CSV file.
+- **Filtering Data:** Removes rows with missing `latitude` or `longitude` to ensure accurate mapping.
+- **Library:** Uses `dplyr` for data manipulation.
+
+```{r Loading_data, echo=FALSE}
+# Load your cleaned data (replace 'cleaned_data.csv' with your file path)
+cleaned_data <- read.csv("cleaned_data.csv", stringsAsFactors = FALSE)
+
+# Filter rows with valid coordinates
+cleaned_data <- cleaned_data %>%
+  filter(!is.na(latitude) & !is.na(longitude))
+
+```
+## Basic Information
+
+```{r Basic_info, echo=FALSE}
+# Basic Information about the dataset
+str(cleaned_data)      # Structure of the dataset
+summary(cleaned_data)  # Summary statistics
+```
+
+### Explanation:
+
+- **`str(cleaned_data)`:** Displays the structure of the dataset, including data types and number of observations.
+- **`summary(cleaned_data)`:** Provides summary statistics (min, max, mean, etc.) for each column in the dataset.
+
+## Unique Values in Each Column
+
+```{r unique_values, echo=FALSE}
+# Number of unique values in each column
+sapply(cleaned_data, function(x) length(unique(x)))
+
+```
+
+### Explanation:
+- **Purpose:** Counts the number of unique values in each column to understand the dataset's diversity.
+- **Function:** `sapply()` applies the `length(unique(x))` function to each column.
+
+
+## Most Frequent Categories
+
+```{r frequency_count, echo=FALSE}
+# Frequency count of the 'category' column
+table(cleaned_data$category, useNA = "ifany")
+
+```
+
+### Explanation:
+- **Purpose:** Provides a frequency count of each unique value in the `category` column.
+- **`useNA = "ifany"`:** Ensures that missing values (`NA`) are included in the count.
+
+## Basic Statistics for Latitude and Longitude
+
+```{r Summary, echo=FALSE}
+# Summary statistics for latitude and longitude
+summary(select(cleaned_data, latitude, longitude))
+
+
+```
+
+### Explanation:
+- **Purpose:** Displays summary statistics (mean, min, max, etc.) specifically for the `latitude` and `longitude` columns.
+- **Function:** Uses `select()` from `dplyr` to focus on these two columns.
+
+## Interactive Map
+
+Below is the interactive map created using the leaflet package. Each point on the map represents a location, and clicking on a marker displays more details about that location.
+
+```{r pressure, echo=FALSE}
+
+# Create a leaflet map
+leaflet(data = cleaned_data) %>%
+  addTiles() %>%  # Add default OpenStreetMap tiles
+  addCircleMarkers(
+    ~longitude, ~latitude,
+    radius = 5,  # Marker size
+    popup = ~paste("Location Name:", location_name, "<br>",
+                   "Category:", category, "<br>",
+                   "Details:", details),  # Add popups for each point
+    color = "blue"
+  ) %>%
+  setView(lng = mean(cleaned_data$longitude), lat = mean(cleaned_data$latitude), zoom = 12)
+
+```
+
+### Explanation:
+- **Purpose:** Creates an interactive map with markers for each location.
+- **Key Functions:**
+  - **`leaflet(data = cleaned_data)`:** Initializes the map with the dataset.
+  - **`addTiles()`:** Adds a base map layer (OpenStreetMap).
+  - **`addCircleMarkers()`:** Adds markers to the map with customized size, color, and pop-up information.
+  - **Popups:** Displays `location_name`, `category`, and `details` when a marker is clicked.
+  - **`setView()`:** Sets the initial map view centered at the mean `latitude` and `longitude`.
+
+## Conclusion
+
+This project demonstrates how geographic data can be effectively visualized using R, focusing on cultural interest points in the city of Barcelona. By leveraging the leaflet library, an interactive map is created to showcase key locations, allowing users to explore the city's cultural landscape dynamically. The process begins with data preparation, where missing or invalid latitude and longitude values are filtered to ensure accuracy. This approach not only highlights the power of R in visualizing spatial data but also underscores its ability to generate meaningful insights across various domains, such as tourism, urban planning, and cultural analysis. The interactivity of the map enhances user engagement, making it a valuable tool for analyzing and presenting geographic data intuitively.
+
